@@ -1,4 +1,4 @@
-// panels/customer/screens/HouseholdProfileStep1.js (Actually Step 2)
+// panels/customer/screens/HouseholdProfileStep1.js (Step 2)
 
 import React, { useState } from 'react';
 import {
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 export default function HouseholdProfileStep1({ navigation, route }) {
   const { registrationData } = route.params || {};
@@ -42,19 +43,20 @@ export default function HouseholdProfileStep1({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    // edges=['top'] ensures content starts below notch/status bar
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
 
-      {/* Top Bar (Consistent with Step 1) */}
+      {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+          <Ionicons name="arrow-back" size={hp('3%')} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.topBarTitle}>Step 2 / 3</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: wp('10%') }} /> 
       </View>
 
       <ScrollView 
@@ -89,7 +91,7 @@ export default function HouseholdProfileStep1({ navigation, route }) {
                 ]}>
                   <Ionicons 
                     name={option.icon} 
-                    size={22} 
+                    size={hp('3%')} 
                     color={familySize === option.value ? '#12783D' : '#6B7280'} 
                   />
                 </View>
@@ -108,7 +110,7 @@ export default function HouseholdProfileStep1({ navigation, route }) {
                 
                 {familySize === option.value && (
                   <View style={styles.checkBadge}>
-                    <Ionicons name="checkmark" size={12} color="#fff" />
+                    <Ionicons name="checkmark" size={hp('1.5%')} color="#fff" />
                   </View>
                 )}
               </TouchableOpacity>
@@ -132,7 +134,7 @@ export default function HouseholdProfileStep1({ navigation, route }) {
               >
                 <Ionicons 
                   name={option.icon} 
-                  size={18} 
+                  size={hp('2.5%')} 
                   color={diet === option.label ? '#fff' : '#4B5563'} 
                   style={styles.chipIcon}
                 />
@@ -147,10 +149,10 @@ export default function HouseholdProfileStep1({ navigation, route }) {
           </View>
         </View>
 
-        {/* Spacer */}
-        <View style={{ flex: 1 }} />
+        {/* Spacer to push content up */}
+        <View style={{ height: hp('5%') }} />
 
-        {/* Buttons (Consistent with Step 1) */}
+        {/* Buttons */}
         <TouchableOpacity
           style={[styles.continueButton, !familySize && styles.disabledButton]}
           onPress={handleContinue}
@@ -167,6 +169,9 @@ export default function HouseholdProfileStep1({ navigation, route }) {
           <Text style={styles.skipButtonText}>Skip for now</Text>
         </TouchableOpacity>
 
+        {/* Extra padding for safe bottom scroll */}
+        <View style={{ height: hp('2%') }} />
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -179,8 +184,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingHorizontal: wp('6%'), // 6% padding from sides
+    paddingBottom: hp('4%'),
   },
   
   // Top Bar
@@ -188,47 +193,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 24,
+    paddingHorizontal: wp('4%'),
+    height: hp('8%'), // Fixed height relative to screen
+    marginBottom: hp('1%'),
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: wp('10%'),
+    height: wp('10%'),
     justifyContent: 'center',
     alignItems: 'flex-start',
   },
   topBarTitle: {
-    fontSize: 16,
+    fontSize: hp('2%'), // Responsive Font
     fontWeight: '600',
     color: '#6B7280',
   },
 
   // Header
   header: {
-    marginBottom: 32,
+    marginBottom: hp('4%'),
   },
   title: {
-    fontSize: 28,
+    fontSize: hp('3.5%'), // Responsive Title
     fontWeight: '800',
     color: '#1F2937',
-    marginBottom: 8,
+    marginBottom: hp('1%'),
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: hp('2%'),
     color: '#6B7280',
-    lineHeight: 24,
+    lineHeight: hp('3%'),
   },
 
   // Section
   section: {
-    marginBottom: 32,
+    marginBottom: hp('4%'),
   },
   label: {
-    fontSize: 15,
+    fontSize: hp('2%'),
     fontWeight: '600',
     color: '#374151',
-    marginBottom: 16,
+    marginBottom: hp('2%'),
   },
 
   // Grid Cards
@@ -236,31 +241,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: wp('3%'),
   },
   card: {
-    width: '48%',
-    padding: 16,
-    borderRadius: 16,
+    width: wp('42%'), // Nearly half width
+    padding: hp('2%'),
+    borderRadius: wp('4%'),
     borderWidth: 1.5,
-    borderColor: '#F3F4F6', // Consistent border color
-    backgroundColor: '#F9FAFB', // Light bg for unselected
+    borderColor: '#F3F4F6', 
+    backgroundColor: '#F9FAFB', 
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 140,
+    minHeight: hp('18%'), // Responsive height
   },
   selectedCard: {
     borderColor: '#12783D',
     backgroundColor: '#F0FDF4',
   },
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: wp('12%'),
+    height: wp('12%'),
+    borderRadius: wp('6%'),
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: hp('1.5%'),
     borderWidth: 1,
     borderColor: '#F3F4F6',
   },
@@ -269,14 +274,14 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   cardLabel: {
-    fontSize: 15,
+    fontSize: hp('1.8%'),
     fontWeight: '700',
     color: '#374151',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: hp('0.5%'),
   },
   cardSubLabel: {
-    fontSize: 13,
+    fontSize: hp('1.6%'),
     color: '#6B7280',
   },
   selectedCardText: {
@@ -287,11 +292,11 @@ const styles = StyleSheet.create({
   },
   checkBadge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    top: wp('2.5%'),
+    right: wp('2.5%'),
+    width: wp('5%'),
+    height: wp('5%'),
+    borderRadius: wp('2.5%'),
     backgroundColor: '#12783D',
     justifyContent: 'center',
     alignItems: 'center',
@@ -301,14 +306,14 @@ const styles = StyleSheet.create({
   chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: wp('2.5%'),
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: wp('4%'),
+    paddingVertical: hp('1.5%'),
+    borderRadius: wp('3%'),
     backgroundColor: '#F9FAFB',
     borderWidth: 1,
     borderColor: '#F3F4F6',
@@ -318,10 +323,10 @@ const styles = StyleSheet.create({
     borderColor: '#12783D',
   },
   chipIcon: {
-    marginRight: 6,
+    marginRight: wp('1.5%'),
   },
   chipText: {
-    fontSize: 15,
+    fontSize: hp('1.8%'),
     fontWeight: '600',
     color: '#4B5563',
   },
@@ -332,12 +337,11 @@ const styles = StyleSheet.create({
   // Buttons
   continueButton: {
     backgroundColor: '#12783D',
-    height: 56,
-    borderRadius: 16,
+    height: hp('7%'), // Responsive height
+    borderRadius: wp('4%'),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 16,
+    marginBottom: hp('2%'),
     shadowColor: '#12783D',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -351,15 +355,15 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: hp('2%'),
     fontWeight: '700',
   },
   skipButton: {
-    paddingVertical: 12,
+    paddingVertical: hp('1.5%'),
     alignItems: 'center',
   },
   skipButtonText: {
-    fontSize: 14,
+    fontSize: hp('1.8%'),
     color: '#6B7280',
     fontWeight: '500',
   },

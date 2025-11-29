@@ -1,43 +1,58 @@
+// panels/customer/screens/PaymentScreen.js
+
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Alert,
   ActivityIndicator,
-  StatusBar
+  StatusBar,
+  Platform
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import BackButton from '../../universalLogins/components/BackButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function PaymentScreen({ navigation }) {
+export default function PaymentScreen({ navigation, route }) {
+  const { selectedAddress } = route.params || {};
   const [selectedMethod, setSelectedMethod] = useState('razorpay'); // 'razorpay' or 'cod'
   const [loading, setLoading] = useState(false);
 
-  const handlePlaceOrder = () => {
-    setLoading(true);
+// In PaymentScreen.js
 
-    // Simulate Payment Processing Delay
-    setTimeout(() => {
-      setLoading(false);
-      // Navigate to Success Screen
-      navigation.replace('OrderConfirmation');
-    }, 2000);
-  };
+const handlePlaceOrder = () => {
+  setLoading(true);
+
+  setTimeout(() => {
+    setLoading(false);
+    // ✅ Correctly navigate to Confirmation Screen
+    navigation.replace('OrderConfirmation'); 
+  }, 2000);
+};
+
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-      <BackButton navigation={navigation} />
       
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment</Text>
-        <View style={{ width: 40 }} />
       </View>
+
+      {/* Address Summary (Optional but helpful) */}
+      {selectedAddress && (
+        <View style={styles.addressBanner}>
+            <Ionicons name="location-outline" size={16} color="#6B7280" />
+            <Text style={styles.addressText} numberOfLines={1}>
+                Delivering to: {selectedAddress.type}
+            </Text>
+        </View>
+      )}
 
       {/* Total Amount Banner */}
       <View style={styles.amountBanner}>
@@ -53,18 +68,19 @@ export default function PaymentScreen({ navigation }) {
         <TouchableOpacity 
           style={[styles.optionCard, selectedMethod === 'razorpay' && styles.selectedOption]}
           onPress={() => setSelectedMethod('razorpay')}
+          activeOpacity={0.8}
         >
           <View style={styles.row}>
-             <View style={styles.iconBox}>
-                <Ionicons name="card" size={24} color="#12783D" />
+             <View style={[styles.iconBox, { backgroundColor: '#E0F2F1' }]}>
+                <Ionicons name="card-outline" size={24} color="#00897B" />
              </View>
              <View style={styles.optionInfo}>
-                <Text style={styles.optionTitle}>Pay Online (UPI / Cards)</Text>
-                <Text style={styles.optionSub}>Fast & Secure</Text>
+                <Text style={styles.optionTitle}>Pay Online</Text>
+                <Text style={styles.optionSub}>UPI, Cards, NetBanking</Text>
              </View>
           </View>
-          <View style={styles.radio}>
-             {selectedMethod === 'razorpay' && <View style={styles.radioActive} />}
+          <View style={styles.radioOuter}>
+             {selectedMethod === 'razorpay' && <View style={styles.radioInner} />}
           </View>
         </TouchableOpacity>
 
@@ -72,18 +88,19 @@ export default function PaymentScreen({ navigation }) {
         <TouchableOpacity 
           style={[styles.optionCard, selectedMethod === 'cod' && styles.selectedOption]}
           onPress={() => setSelectedMethod('cod')}
+          activeOpacity={0.8}
         >
            <View style={styles.row}>
-             <View style={styles.iconBox}>
-                <Ionicons name="cash" size={24} color="#F79009" />
+             <View style={[styles.iconBox, { backgroundColor: '#FFF3E0' }]}>
+                <Ionicons name="cash-outline" size={24} color="#FB8C00" />
              </View>
              <View style={styles.optionInfo}>
                 <Text style={styles.optionTitle}>Cash on Delivery</Text>
                 <Text style={styles.optionSub}>Pay when order arrives</Text>
              </View>
           </View>
-          <View style={styles.radio}>
-             {selectedMethod === 'cod' && <View style={styles.radioActive} />}
+          <View style={styles.radioOuter}>
+             {selectedMethod === 'cod' && <View style={styles.radioInner} />}
           </View>
         </TouchableOpacity>
       </View>
@@ -98,43 +115,149 @@ export default function PaymentScreen({ navigation }) {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.payBtnText}>
-              {selectedMethod === 'cod' ? 'Place Order' : 'Pay & Order'}
-            </Text>
+            <View style={styles.btnContent}>
+                <Text style={styles.payBtnText}>
+                {selectedMethod === 'cod' ? 'Place Order' : 'Pay & Order'}
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </View>
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff', elevation: 2 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 16, color: '#333' },
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
   
-  amountBanner: { padding: 20, backgroundColor: '#fff', alignItems: 'center', marginBottom: 12 },
-  amountLabel: { color: '#666', fontSize: 14 },
-  amountValue: { color: '#12783D', fontSize: 32, fontWeight: 'bold', marginTop: 4 },
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  backBtn: { marginRight: 16 },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  
+  // Address Banner
+  addressBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      backgroundColor: '#F3F4F6',
+      gap: 6
+  },
+  addressText: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
 
-  section: { padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 12, color: '#333' },
+  // Amount Banner
+  amountBanner: { 
+      padding: 32, 
+      backgroundColor: '#fff', 
+      alignItems: 'center', 
+      marginBottom: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: '#F3F4F6'
+  },
+  amountLabel: { color: '#6B7280', fontSize: 14, fontWeight: '500', marginBottom: 8 },
+  amountValue: { color: '#111827', fontSize: 36, fontWeight: '800' },
+
+  // Section
+  section: { padding: 20 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 16, color: '#374151' },
   
-  optionCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12, elevation: 1 },
-  selectedOption: { borderWidth: 1, borderColor: '#12783D', backgroundColor: '#F0FDF4' },
+  // Option Card
+  optionCard: { 
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      alignItems: 'center', 
+      backgroundColor: '#fff', 
+      padding: 16, 
+      borderRadius: 16, 
+      marginBottom: 12, 
+      borderWidth: 1.5,
+      borderColor: '#F3F4F6',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2
+  },
+  selectedOption: { 
+      borderColor: '#12783D', 
+      backgroundColor: '#F0FDF4' 
+  },
   
   row: { flexDirection: 'row', alignItems: 'center' },
-  iconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#F5F5F5', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-  optionTitle: { fontSize: 16, fontWeight: '600', color: '#333' },
-  optionSub: { fontSize: 12, color: '#888' },
+  iconBox: { 
+      width: 48, 
+      height: 48, 
+      borderRadius: 24, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      marginRight: 16 
+  },
+  optionInfo: { justifyContent: 'center' },
+  optionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 2 },
+  optionSub: { fontSize: 13, color: '#6B7280' },
   
-  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#ccc', justifyContent: 'center', alignItems: 'center' },
-  radioActive: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#12783D' },
+  // Radio
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#12783D',
+  },
 
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: '#fff', elevation: 10 },
-  payButton: { backgroundColor: '#12783D', padding: 16, borderRadius: 8, alignItems: 'center' },
-  payBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  // Footer
+  footer: { 
+      position: 'absolute', 
+      bottom: 0, 
+      left: 0, 
+      right: 0, 
+      padding: 20, 
+      backgroundColor: '#fff', 
+      borderTopWidth: 1,
+      borderTopColor: '#F3F4F6',
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8
+  },
+  payButton: { 
+      backgroundColor: '#12783D', 
+      paddingVertical: 16, 
+      borderRadius: 12, 
+      alignItems: 'center',
+      shadowColor: '#12783D',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4
+  },
+  btnContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8
+  },
+  payBtnText: { 
+      color: '#fff', 
+      fontWeight: '700', 
+      fontSize: 16 
+  },
 });
-
-
-

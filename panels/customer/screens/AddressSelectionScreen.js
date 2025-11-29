@@ -1,3 +1,5 @@
+// panels/customer/screens/AddressSelectionScreen.js
+
 import React, { useState } from 'react';
 import {
   View,
@@ -6,20 +8,16 @@ import {
   FlatList,
   StyleSheet,
   StatusBar,
-  Modal,
-  TextInput,
+  Platform
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import BackButton from '../../universalLogins/components/BackButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AddressSelectionScreen({ navigation }) {
   const [addresses, setAddresses] = useState([
     { id: '1', type: 'Home', address: 'Flat 204, Skyline Apartments, Civil Lines, Bareilly', selected: true },
     { id: '2', type: 'Work', address: 'Office 302, IT Park, Bareilly', selected: false },
   ]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newAddress, setNewAddress] = useState('');
 
   const selectAddress = (id) => {
     setAddresses(prev => prev.map(addr => ({
@@ -28,49 +26,47 @@ export default function AddressSelectionScreen({ navigation }) {
     })));
   };
 
-  const addNewAddress = () => {
-    if (newAddress.trim()) {
-      setAddresses([...addresses, {
-        id: Date.now().toString(),
-        type: 'Other',
-        address: newAddress,
-        selected: true // Auto-select new address
-      }]);
-      setNewAddress('');
-      setModalVisible(false);
-    }
+  // Use existing LocationCaptureScreen for adding new address
+  const handleAddNew = () => {
+    navigation.navigate('LocationCapture', { 
+        registrationData: {}, // Empty data for new address
+        isNewAddress: true 
+    });
   };
 
   const renderAddress = ({ item }) => (
     <TouchableOpacity 
       style={[styles.addressCard, item.selected && styles.selectedCard]} 
       onPress={() => selectAddress(item.id)}
+      activeOpacity={0.7}
     >
       <View style={styles.cardHeader}>
         <View style={styles.typeRow}>
           <Ionicons 
             name={item.type === 'Home' ? 'home' : item.type === 'Work' ? 'briefcase' : 'location'} 
-            size={18} 
-            color={item.selected ? '#12783D' : '#666'} 
+            size={20} 
+            color={item.selected ? '#12783D' : '#6B7280'} 
           />
           <Text style={[styles.addressType, item.selected && styles.selectedText]}>{item.type}</Text>
         </View>
-        {item.selected && <Ionicons name="checkmark-circle" size={22} color="#12783D" />}
+        <View style={styles.radioOuter}>
+            {item.selected && <View style={styles.radioInner} />}
+        </View>
       </View>
       <Text style={styles.addressText}>{item.address}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-      <BackButton navigation={navigation} />
       
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Select Address</Text>
+        <Text style={styles.headerTitle}>Select Delivery Address</Text>
       </View>
 
       <FlatList
@@ -78,9 +74,10 @@ export default function AddressSelectionScreen({ navigation }) {
         renderItem={renderAddress}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListFooterComponent={
-          <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-            <Ionicons name="add" size={20} color="#12783D" />
+          <TouchableOpacity style={styles.addButton} onPress={handleAddNew}>
+            <Ionicons name="add-circle-outline" size={24} color="#12783D" />
             <Text style={styles.addButtonText}>Add New Address</Text>
           </TouchableOpacity>
         }
@@ -90,70 +87,137 @@ export default function AddressSelectionScreen({ navigation }) {
       <View style={styles.footer}>
         <TouchableOpacity 
           style={styles.proceedButton}
-          onPress={() => navigation.navigate('Payment')}
+          onPress={() => navigation.navigate('Payment', { 
+              selectedAddress: addresses.find(a => a.selected) 
+          })}
         >
           <Text style={styles.proceedBtnText}>Proceed to Payment</Text>
+          <Ionicons name="arrow-forward" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
-
-      {/* Simple Add Address Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add New Address</Text>
-            <TextInput 
-              style={styles.input} 
-              placeholder="Enter full address"
-              value={newAddress}
-              onChangeText={setNewAddress}
-              multiline
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelBtn}>
-                <Text style={{ color: '#666' }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={addNewAddress} style={styles.saveBtn}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save Address</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff', elevation: 2 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 16, color: '#333' },
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
   
-  listContent: { padding: 16 },
-  addressCard: { backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12, elevation: 1, borderWidth: 1, borderColor: 'transparent' },
-  selectedCard: { borderColor: '#12783D', backgroundColor: '#F0FDF4' },
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  backBtn: { marginRight: 16 },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
   
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  listContent: { padding: 20 },
+  
+  // Address Card
+  addressCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#F3F4F6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  selectedCard: {
+    borderColor: '#12783D',
+    backgroundColor: '#F0FDF4',
+  },
+  
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   typeRow: { flexDirection: 'row', alignItems: 'center' },
-  addressType: { fontWeight: 'bold', marginLeft: 8, color: '#666' },
+  addressType: { fontWeight: '700', marginLeft: 8, fontSize: 16, color: '#4B5563' },
   selectedText: { color: '#12783D' },
-  addressText: { color: '#555', lineHeight: 20 },
   
-  addButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderStyle: 'dashed', borderWidth: 1, borderColor: '#12783D', borderRadius: 12, backgroundColor: '#E8F5E9' },
-  addButtonText: { color: '#12783D', fontWeight: 'bold', marginLeft: 8 },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#12783D',
+  },
   
-  footer: { padding: 16, backgroundColor: '#fff', elevation: 10 },
-  proceedButton: { backgroundColor: '#12783D', padding: 16, borderRadius: 8, alignItems: 'center' },
-  proceedBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-
-  // Modal Styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 12 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginBottom: 16, height: 80, textAlignVertical: 'top' },
-  modalButtons: { flexDirection: 'row', justifyContent: 'flex-end' },
-  cancelBtn: { padding: 12, marginRight: 16 },
-  saveBtn: { backgroundColor: '#12783D', padding: 12, borderRadius: 8 },
+  addressText: {
+    color: '#6B7280',
+    fontSize: 14,
+    lineHeight: 22,
+    marginLeft: 28, // Align with text above
+  },
+  
+  // Add Button
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderStyle: 'dashed',
+    borderWidth: 1.5,
+    borderColor: '#12783D',
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    marginTop: 8,
+  },
+  addButtonText: {
+    color: '#12783D',
+    fontWeight: '700',
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  
+  // Footer
+  footer: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  proceedButton: {
+    backgroundColor: '#12783D',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#12783D',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  proceedBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 });
-
-
-
