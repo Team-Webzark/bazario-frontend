@@ -9,6 +9,7 @@ import {
   Alert
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from '../../universalLogins/components/BackButton';
 
 export default function OrderDetailsScreen({ route, navigation }) {
   // Receive Order ID from previous screen
@@ -49,13 +50,13 @@ export default function OrderDetailsScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <BackButton navigation={navigation} />
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
         <Text style={styles.headerTitle}>Order Details</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

@@ -10,6 +10,7 @@ import {
     StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from '../../universalLogins/components/BackButton';
 
 // --- MOCK DATA ---
 const PRODUCTS = [
@@ -49,11 +50,11 @@ export default function CategoryListingScreen({ route, navigation }) {
     <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       
+      <BackButton navigation={navigation} style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
+      
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
         <Text style={styles.headerTitle}>{category}</Text>
         <TouchableOpacity>
             <Ionicons name="search" size={24} color="#333" />

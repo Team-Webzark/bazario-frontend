@@ -1,3 +1,5 @@
+// panels/customer/screens/SplashScreen.js
+
 import React, { useEffect, useRef } from 'react';
 import {
   View,
@@ -5,16 +7,17 @@ import {
   StyleSheet,
   Animated,
   StatusBar,
-  Dimensions
+  Dimensions,
+  Image
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
+// Get screen dimensions to size image properly if needed
 const { width } = Dimensions.get('window');
 
 export default function SplashScreen({ navigation }) {
   // Animation Values
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current; // Start slightly larger
 
   useEffect(() => {
     // Start Animation
@@ -26,7 +29,8 @@ export default function SplashScreen({ navigation }) {
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
-        friction: 5,
+        friction: 6,
+        tension: 40,
         useNativeDriver: true,
       }),
     ]).start();
@@ -36,32 +40,35 @@ export default function SplashScreen({ navigation }) {
        // Check if user logged in (mock logic)
        const isLoggedIn = false; 
        if (isLoggedIn) {
-          // If logged in, go to Main Customer App
-          navigation.replace('CustomerApp');
+         navigation.replace('CustomerApp');
        } else {
-          // If not logged in, go to Onboarding (or straight to RoleSelection if preferred)
-          navigation.replace('OnboardingCarousel');
+         navigation.replace('UniversalSignIn');
        }
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#12783D" barStyle="light-content" />
+      {/* Dark content for white background */}
+      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       
       <Animated.View 
          style={[
-            styles.logoContainer, 
-            { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
+           styles.logoContainer, 
+           { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
          ]}
       >
-         <View style={styles.iconCircle}>
-            <Ionicons name="basket" size={60} color="#12783D" />
-         </View>
+         {/* YOUR LOGO IMAGE */}
+         {/* Make sure to save your image in assets folder */}
+         <Image 
+            source={require('../../../assets/bazario.png')} 
+            style={styles.logoImage}
+            resizeMode="contain"
+         />
          
-         <Text style={styles.appName}>Bazario</Text>
+         {/* Tagline (Optional - since logo has text, you might want to keep it minimal) */}
          <Text style={styles.tagline}>Groceries in minutes</Text>
       </Animated.View>
 
@@ -77,46 +84,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#12783D', // Brand Primary Color
+    backgroundColor: '#ffffff', // White background to match logo
   },
   logoContainer: {
     alignItems: 'center',
-  },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#fff',
     justifyContent: 'center',
-    alignItems: 'center',
+    width: width * 0.8, // 80% of screen width
+    height: width * 0.8,
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%', 
     marginBottom: 20,
-    elevation: 10, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
   },
-  appName: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 8,
-    letterSpacing: 1,
-  },
+  // Since the logo image already has "BAZARIO" text, we removed the duplicate Text component.
+  
   tagline: {
     fontSize: 16,
-    color: '#E8F5E9',
-    opacity: 0.9,
+    color: '#666', // Dark Grey for better readability on white
+    marginTop: -40, // Pull up slightly if logo has a lot of whitespace
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
   footer: {
     position: 'absolute',
     bottom: 40,
   },
   footerText: {
-    color: 'rgba(255,255,255,0.6)',
+    color: '#999', // Light Grey
     fontSize: 12,
   },
 });
-
-
-

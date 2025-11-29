@@ -1,282 +1,363 @@
+// panels/universalLogins/screens/OtpVerificationScreen.js
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
+  StyleSheet,
   ActivityIndicator,
   Alert,
-  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
 } from 'react-native';
+// ✅ Import from react-native-safe-area-context
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { detectUserRole } from '../../../config/userRoles';
 
-export default function OtpVerificationScreen({ navigation, route }) {
-  // 1. Get email and role from previous screen
-  const { email = 'user@example.com', role = 'customer' } = route.params || {};
-
-  const [otp, setOtp] = useState(['', '', '', '']); // Array for 4 digits
-  const [isLoading, setIsLoading] = useState(false);
-  const [timer, setTimer] = useState(30); // 30-second countdown
+export default function OtpVerificationScreen({ route, navigation }) {
+  const { email } = route.params;
   
-  // Refs to manage focus between inputs
+  const [otp, setOtp] = useState(['', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [timer, setTimer] = useState(60);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  
   const inputRefs = useRef([]);
 
-  // 2. Countdown Timer Logic
   useEffect(() => {
-    let interval = null;
     if (timer > 0) {
-      interval = setInterval(() => {
+      const interval = setInterval(() => {
         setTimer((prev) => prev - 1);
       }, 1000);
+      return () => clearInterval(interval);
     }
-    return () => clearInterval(interval);
   }, [timer]);
 
-  // 3. Handle Input Change
-  const handleChange = (text, index) => {
-    // Only allow numbers
-    if (!/^\d*$/.test(text)) return;
-
+  const handleOtpChange = (value, index) => {
     const newOtp = [...otp];
-    newOtp[index] = text;
+    newOtp[index] = value;
     setOtp(newOtp);
-
-    // Auto-focus next input if text is entered
-    if (text && index < 3) {
-      inputRefs.current[index + 1].focus();
-    }
-
-    // Auto-submit if all 4 digits are filled
-    if (newOtp.every((digit) => digit !== '') && index === 3) {
-      verifyOtp(newOtp.join(''));
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // 4. Handle Backspace (Move to previous input)
-  const handleBackspace = (key, index) => {
-    if (key === 'Backspace') {
-      if (!otp[index] && index > 0) {
-        // If current box is empty, move back and clear previous
-        const newOtp = [...otp];
-        newOtp[index - 1] = '';
-        setOtp(newOtp);
-        inputRefs.current[index - 1].focus();
-      }
+  const handleKeyPress = (e, index) => {
+    if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
-  // 5. Verify OTP API Mock
-  // Inside OtpVerificationScreen.js
-
-  const verifyOtp = async (otpString) => {
-    Keyboard.dismiss();
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleVerifyOtp = async () => {
+    const otpCode = otp.join('');
+    if (otpCode.length !== 4) {
+      Alert.alert('Error', 'Please enter complete 4-digit OTP');
+      return;
+    }
+    setLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       
-      if (otpString === '1234') { 
-        // ✅ LOGIC CHANGE HERE
-        if (role === 'customer') {
-          // Stack reset karke CustomerApp par le jao (User wapas back nahi kar payega)
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'CustomerApp' }],
-          });
-        } else if (role === 'delivery') {
-          // Future: Navigate to DeliveryDashboard
-          Alert.alert("Delivery Partner", "Delivery Panel Coming Soon!");
-        } else if (role === 'admin') {
-           // Admin flow is usually password based, but handling just in case
-           Alert.alert("Admin", "Admin Panel Coming Soon!");
-        }
+      if (otpCode === '1234') {
+        const role = detectUserRole(email);
+        if (role === 'admin') navigation.replace('AdminApp');
+        else if (role === 'delivery') navigation.replace('DeliveryApp');
+        else if (role === 'customer') navigation.replace('CustomerApp');
+        else navigation.replace('CustomerRegistration', { email });
       } else {
-        Alert.alert('Error', 'Invalid OTP. Try 1234');
+        Alert.alert('Invalid OTP', 'The code you entered is incorrect.');
+        setOtp(['', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
-    }, 1000);
+    } catch (error) {
+      Alert.alert('Error', 'Verification failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  
-  const navigateToHome = () => {
-      // Navigation logic based on role
-      // For now, just going back or to a placeholder 'Home'
-      console.log(`Navigating to ${role} home`);
-      // navigation.replace('CustomerAppStack'); // Example
-  };
-
-  const handleResend = () => {
-    if (timer === 0) {
-      setTimer(30);
-      Alert.alert('Sent', 'A new code has been sent to your email.');
+  const handleResendOtp = async () => {
+    setResendLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      Alert.alert('Sent!', `New code sent to ${email}`);
+      setTimer(60);
+      setOtp(['', '', '', '']);
+      inputRefs.current[0]?.focus();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to resend OTP.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.contentContainer}>
-        {/* Header */}
-        <Text style={styles.title}>Verify your email</Text>
-        <Text style={styles.subtitle}>
-          Enter the 4-digit code we sent to{'\n'}
-          <Text style={styles.emailText}>{email}</Text>
-        </Text>
-
-        {/* OTP Inputs */}
-        <View style={styles.otpContainer}>
-          {otp.map((digit, index) => (
-            <TextInput
-              key={index}
-              ref={(ref) => (inputRefs.current[index] = ref)}
-              style={[
-                styles.otpBox,
-                digit ? styles.otpBoxFilled : null,
-                // Highlight focused input logic could go here if using state for focus
-              ]}
-              keyboardType="number-pad"
-              maxLength={1}
-              value={digit}
-              onChangeText={(text) => handleChange(text, index)}
-              onKeyPress={({ nativeEvent }) =>
-                handleBackspace(nativeEvent.key, index)
-              }
-              // UI Polish
-              cursorColor="#12783D"
-              selectionColor="#A0CFA0"
-            />
-          ))}
-        </View>
-
-        {/* Verify Button */}
-        <TouchableOpacity
-          style={[
-            styles.button,
-            (otp.some((d) => d === '') || isLoading) && styles.buttonDisabled
-          ]}
-          onPress={() => verifyOtp(otp.join(''))}
-          disabled={otp.some((d) => d === '') || isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.buttonText}>Verify</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Resend Timer */}
-        <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Didn't receive code? </Text>
+    // ✅ Use edges prop to handle safe area correctly
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        {/* Top Bar: Back Button + Brand */}
+        <View style={styles.topBar}>
           <TouchableOpacity 
-            onPress={handleResend} 
-            disabled={timer > 0}
+            style={styles.backButton} 
+            onPress={() => navigation.goBack()}
           >
-            <Text style={[
-              styles.resendLink, 
-              timer > 0 && styles.resendLinkDisabled
-            ]}>
-              {timer > 0 ? `Resend in ${timer}s` : 'Resend'}
-            </Text>
+            <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
+          
+          <View style={styles.brandContainer}>
+            <Text style={styles.brandText}>BAZARIO</Text>
+          </View>
+          
+          <View style={{ width: 40 }} /> 
         </View>
-      </View>
-    </KeyboardAvoidingView>
+
+        <View style={styles.content}>
+          {/* Header Text */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Enter Verification Code</Text>
+            <Text style={styles.subtitle}>
+              We have sent the 4-digit code to
+            </Text>
+            <Text style={styles.email}>{email}</Text>
+          </View>
+
+          {/* OTP Inputs */}
+          <View style={styles.otpContainer}>
+            {otp.map((digit, index) => (
+              <TextInput
+                key={index}
+                ref={(ref) => (inputRefs.current[index] = ref)}
+                style={[
+                  styles.otpInput,
+                  focusedIndex === index && styles.otpInputFocused,
+                  digit && styles.otpInputFilled,
+                ]}
+                value={digit}
+                onChangeText={(value) => handleOtpChange(value, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                onFocus={() => setFocusedIndex(index)}
+                onBlur={() => setFocusedIndex(-1)}
+                keyboardType="number-pad"
+                maxLength={1}
+                selectTextOnFocus
+                cursorColor="#12783D"
+              />
+            ))}
+          </View>
+
+          {/* Resend Timer */}
+          <View style={styles.resendContainer}>
+            {timer > 0 ? (
+              <Text style={styles.timerText}>
+                Resend code in <Text style={styles.timerBold}>{timer}s</Text>
+              </Text>
+            ) : (
+              <TouchableOpacity onPress={handleResendOtp} disabled={resendLoading}>
+                <Text style={styles.resendText}>
+                  {resendLoading ? 'Sending...' : 'Resend Code'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Verify Button */}
+          <TouchableOpacity
+            style={[styles.verifyButton, loading && styles.verifyButtonDisabled]}
+            onPress={handleVerifyOtp}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.verifyButtonText}>Verify & Continue</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Change Email Option */}
+          <View style={styles.changeEmailContainer}>
+            <Text style={styles.wrongEmailText}>Entered wrong email?</Text>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.changeEmailBtn}>
+              <Text style={styles.changeEmailText}>Change Email</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF6EF', // Matches previous screens
+    backgroundColor: '#fff',
   },
-  contentContainer: {
+  keyboardView: {
+    flex: 1,
+  },
+  
+  // Top Bar
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    marginBottom: 32,
+    marginTop: 12, // Slightly adjusted for visual balance
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  brandContainer: {
+    alignItems: 'center',
+  },
+  brandText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#12783D',
+    letterSpacing: 2,
+  },
+
+  content: {
     flex: 1,
     paddingHorizontal: 24,
-    justifyContent: 'center',
+  },
+  
+  // Header
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#242424',
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#111827',
     marginBottom: 12,
-    textAlign: 'left',
+    textAlign: 'center',
   },
   subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  email: {
     fontSize: 16,
-    color: '#595959',
-    lineHeight: 24,
-    marginBottom: 32,
-    textAlign: 'left',
+    fontWeight: '700',
+    color: '#12783D',
   },
-  emailText: {
-    fontWeight: '600',
-    color: '#12783D', // Brand Green
-  },
+
+  // Inputs
   otpContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Spreads the 4 boxes evenly
-    marginBottom: 40,
+    justifyContent: 'space-between',
     paddingHorizontal: 10,
+    marginBottom: 32,
   },
-  otpBox: {
-    width: 60,
+  otpInput: {
+    width: 64,
     height: 64,
-    borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#E0E0E0', // Default border
-    backgroundColor: '#FFFFFF',
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
     textAlign: 'center',
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#242424',
-    elevation: 1, // Slight shadow on Android
-    shadowColor: '#000', // IOS Shadow
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    fontWeight: '700',
+    color: '#1F2937',
+    backgroundColor: '#F9FAFB',
   },
-  otpBoxFilled: {
-    borderColor: '#12783D', // Green border when filled
-    backgroundColor: '#F0FDF4', // Very light green tint
-  },
-  button: {
-    backgroundColor: '#12783D',
-    borderRadius: 32,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+  otpInputFocused: {
+    borderColor: '#12783D',
+    backgroundColor: '#fff',
+    transform: [{scale: 1.05}],
+    shadowColor: '#12783D',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  buttonDisabled: {
-    backgroundColor: '#A0CFA0',
-    elevation: 0,
+  otpInputFilled: {
+    backgroundColor: '#fff',
+    borderColor: '#12783D',
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
+
+  // Resend
   resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  timerText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  timerBold: {
+    color: '#12783D',
+    fontWeight: '700',
   },
   resendText: {
-    color: '#595959',
-    fontSize: 14,
-  },
-  resendLink: {
+    fontSize: 15,
     color: '#12783D',
-    fontWeight: 'bold',
-    fontSize: 14,
+    fontWeight: '600',
   },
-  resendLinkDisabled: {
-    color: '#A0A0A0', // Grey when timer is running
+
+  // Buttons
+  verifyButton: {
+    backgroundColor: '#12783D',
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    shadowColor: '#12783D',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  verifyButtonDisabled: {
+    backgroundColor: '#9EC8AE',
+    elevation: 0,
+  },
+  verifyButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+
+  // Change Email
+  changeEmailContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  wrongEmailText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginRight: 6,
+  },
+  changeEmailBtn: {
+    paddingVertical: 4,
+  },
+  changeEmailText: {
+    fontSize: 14,
+    color: '#12783D',
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 });

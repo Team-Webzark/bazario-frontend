@@ -10,6 +10,7 @@ import {
   StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from '../../universalLogins/components/BackButton';
 
 export default function CartScreen({ navigation }) {
   // --- MOCK DATA (Initially populated) ---
@@ -97,6 +98,7 @@ export default function CartScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <BackButton navigation={navigation} style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
       
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Cart</Text>

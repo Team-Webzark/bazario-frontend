@@ -1,3 +1,5 @@
+// panels/customer/screens/AccountScreen.js
+
 import React from 'react';
 import {
   View,
@@ -19,7 +21,20 @@ export default function AccountScreen({ navigation }) {
       "Are you sure you want to logout?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Logout", style: "destructive", onPress: () => navigation.replace('MobileNumberInput') }
+        { 
+          text: "Logout", 
+          style: "destructive", 
+          onPress: () => {
+            // Clear any stored auth data here
+            // AsyncStorage.removeItem('userToken');
+            
+            // Navigate back to login
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'UniversalSignIn' }]
+            });
+          }
+        }
       ]
     );
   };
@@ -28,7 +43,8 @@ export default function AccountScreen({ navigation }) {
     { icon: 'location-outline', title: 'Saved Addresses', screen: 'SavedAddresses' },
     { icon: 'card-outline', title: 'Payment Methods', screen: 'PaymentMethods' },
     { icon: 'notifications-outline', title: 'Notifications', screen: 'NotificationsSettings' },
-    { icon: 'heart-outline', title: 'My Favorites', screen: 'CategoryListing' }, // Example link
+    { icon: 'heart-outline', title: 'My Favorites', screen: 'CategoryListing' },
+    { icon: 'settings-outline', title: 'Preferences', screen: 'PreferencesEdit' },
     { icon: 'help-circle-outline', title: 'Help & Support', screen: 'IssueReporting' },
     { icon: 'information-circle-outline', title: 'About App', screen: null },
   ];
@@ -41,7 +57,7 @@ export default function AccountScreen({ navigation }) {
     >
       <View style={styles.menuLeft}>
         <View style={styles.iconBox}>
-           <Ionicons name={item.icon} size={22} color="#333" />
+          <Ionicons name={item.icon} size={22} color="#333" />
         </View>
         <Text style={styles.menuText}>{item.title}</Text>
       </View>
@@ -62,17 +78,20 @@ export default function AccountScreen({ navigation }) {
         
         {/* User Profile Card */}
         <View style={styles.profileCard}>
-           <Image 
-             source={{ uri: 'https://randomuser.me/api/portraits/men/75.jpg' }} 
-             style={styles.avatar} 
-           />
-           <View style={styles.profileInfo}>
-              <Text style={styles.userName}>Shadmaan</Text>
-              <Text style={styles.userPhone}>+91 98765 43210</Text>
-              <TouchableOpacity style={styles.editBtn}>
-                 <Text style={styles.editBtnText}>Edit Profile</Text>
-              </TouchableOpacity>
-           </View>
+          <Image 
+            source={{ uri: 'https://randomuser.me/api/portraits/men/75.jpg' }} 
+            style={styles.avatar} 
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.userName}>Shadmaan</Text>
+            <Text style={styles.userPhone}>+91 98765 43210</Text>
+            <TouchableOpacity 
+              style={styles.editBtn}
+              onPress={() => navigation.navigate('PreferencesEdit')}
+            >
+              <Text style={styles.editBtnText}>Edit Profile</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Menu Sections */}
@@ -88,8 +107,8 @@ export default function AccountScreen({ navigation }) {
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-           <Ionicons name="log-out-outline" size={20} color="#FF4444" />
-           <Text style={styles.logoutText}>Log Out</Text>
+          <Ionicons name="log-out-outline" size={20} color="#FF4444" />
+          <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
 
         <Text style={styles.versionText}>Version 1.0.0</Text>
@@ -107,7 +126,15 @@ const styles = StyleSheet.create({
   
   content: { padding: 16 },
   
-  profileCard: { flexDirection: 'row', backgroundColor: '#fff', padding: 20, borderRadius: 12, marginBottom: 24, alignItems: 'center', elevation: 1 },
+  profileCard: { 
+    flexDirection: 'row', 
+    backgroundColor: '#fff', 
+    padding: 20, 
+    borderRadius: 12, 
+    marginBottom: 24, 
+    alignItems: 'center', 
+    elevation: 1 
+  },
   avatar: { width: 70, height: 70, borderRadius: 35, marginRight: 16 },
   profileInfo: { flex: 1 },
   userName: { fontSize: 20, fontWeight: 'bold', color: '#333' },
@@ -116,17 +143,49 @@ const styles = StyleSheet.create({
   editBtnText: { color: '#12783D', fontWeight: '600', fontSize: 14 },
 
   section: { marginBottom: 24 },
-  sectionHeader: { fontSize: 12, fontWeight: 'bold', color: '#888', marginBottom: 8, marginLeft: 8 },
-  menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 2 },
+  sectionHeader: { 
+    fontSize: 12, 
+    fontWeight: 'bold', 
+    color: '#888', 
+    marginBottom: 8, 
+    marginLeft: 8 
+  },
+  menuItem: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    backgroundColor: '#fff', 
+    padding: 16, 
+    borderRadius: 12, 
+    marginBottom: 2 
+  },
   menuLeft: { flexDirection: 'row', alignItems: 'center' },
-  iconBox: { width: 36, height: 36, backgroundColor: '#F9F9F9', borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  iconBox: { 
+    width: 36, 
+    height: 36, 
+    backgroundColor: '#F9F9F9', 
+    borderRadius: 18, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginRight: 12 
+  },
   menuText: { fontSize: 16, color: '#333' },
 
-  logoutButton: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF0F0', padding: 16, borderRadius: 12, marginBottom: 24 },
-  logoutText: { color: '#FF4444', fontWeight: 'bold', fontSize: 16, marginLeft: 8 },
+  logoutButton: { 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#FFF0F0', 
+    padding: 16, 
+    borderRadius: 12, 
+    marginBottom: 24 
+  },
+  logoutText: { 
+    color: '#FF4444', 
+    fontWeight: 'bold', 
+    fontSize: 16, 
+    marginLeft: 8 
+  },
   
   versionText: { textAlign: 'center', color: '#ccc', fontSize: 12 },
 });
-
-
-

@@ -10,6 +10,7 @@ import {
   StatusBar
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from '../../universalLogins/components/BackButton';
 
 export default function PaymentScreen({ navigation }) {
   const [selectedMethod, setSelectedMethod] = useState('razorpay'); // 'razorpay' or 'cod'
@@ -29,13 +30,13 @@ export default function PaymentScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <BackButton navigation={navigation} />
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
         <Text style={styles.headerTitle}>Payment</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       {/* Total Amount Banner */}

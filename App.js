@@ -1,23 +1,26 @@
+// App.js
+
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// --- AUTH & ONBOARDING ---
+// --- STARTUP & AUTH ---
 import SplashScreen from './panels/customer/screens/SplashScreen';
-import OnboardingCarouselScreen from './panels/customer/screens/OnboardingCarouselScreen';
-
-// --- UNIVERSAL LOGIN ---
-import RoleSelectionScreen from './panels/universalLogins/screens/RoleSelectionScreen';
-import MobileNumberInputScreen from './panels/universalLogins/screens/MobileNumberInputScreen';
+import UniversalSignInScreen from './panels/universalLogins/screens/UniversalSignInScreen';
 import OtpVerificationScreen from './panels/universalLogins/screens/OtpVerificationScreen';
-import PasswordLoginScreen from './panels/universalLogins/screens/PasswordLoginScreen';
-import SelectOrSwitchRoleScreen from './panels/universalLogins/screens/SelectOrSwitchRoleScreen';
-import AccountBlockedScreen from './panels/universalLogins/screens/AccountBlockedScreen';
+
+// --- CUSTOMER REGISTRATION FLOW ---
+import CustomerRegistrationScreen from './panels/customer/screens/CustomerRegistrationScreen';
+import HouseholdProfileStep1 from './panels/customer/screens/HouseholdProfileStep1';
+import HouseholdProfileStep2 from './panels/customer/screens/HouseholdProfileStep2';
+import LocationCaptureScreen from './panels/customer/screens/LocationCaptureScreen';
 
 // --- NAVIGATORS ---
 import CustomerNavigator from './navigation/CustomerNavigator';
-// import DeliveryNavigator from './navigation/DeliveryNavigator'; // Future
-// import AdminNavigator from './navigation/AdminNavigator'; // Future
+
+// --- PLACEHOLDER DASHBOARDS (Temporary until full navigators are built) ---
+import AdminDashboardScreen from './panels/admin/screens/AdminDashboardScreen';
+import DeliveryDashboardScreen from './panels/delivery/screens/DeliveryDashboardScreen';
 
 const RootStack = createNativeStackNavigator();
 
@@ -28,18 +31,21 @@ export default function App() {
         
         {/* 1. Startup Flow */}
         <RootStack.Screen name="Splash" component={SplashScreen} />
-        <RootStack.Screen name="OnboardingCarousel" component={OnboardingCarouselScreen} />
 
-        {/* 2. Auth Flow */}
-        <RootStack.Screen name="RoleSelection" component={RoleSelectionScreen} />
-        <RootStack.Screen name="MobileNumberInput" component={MobileNumberInputScreen} />
+        {/* 2. Authentication Flow */}
+        <RootStack.Screen name="UniversalSignIn" component={UniversalSignInScreen} />
         <RootStack.Screen name="OtpVerification" component={OtpVerificationScreen} />
-        <RootStack.Screen name="PasswordLogin" component={PasswordLoginScreen} />
-        <RootStack.Screen name="SelectOrSwitchRole" component={SelectOrSwitchRoleScreen} />
-        <RootStack.Screen name="AccountBlocked" component={AccountBlockedScreen} />
 
-        {/* 3. Main App Flows */}
+        {/* 3. Customer Registration Flow */}
+        <RootStack.Screen name="CustomerRegistration" component={CustomerRegistrationScreen} />
+        <RootStack.Screen name="HouseholdProfileStep1" component={HouseholdProfileStep1} />
+        <RootStack.Screen name="HouseholdProfileStep2" component={HouseholdProfileStep2} />
+        <RootStack.Screen name="LocationCapture" component={LocationCaptureScreen} />
+
+        {/* 4. Main App Flows (Role-based Dashboards) */}
         <RootStack.Screen name="CustomerApp" component={CustomerNavigator} />
+        <RootStack.Screen name="AdminApp" component={AdminDashboardScreen} />
+        <RootStack.Screen name="DeliveryApp" component={DeliveryDashboardScreen} />
         
       </RootStack.Navigator>
     </NavigationContainer>

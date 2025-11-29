@@ -10,6 +10,7 @@ import {
   Keyboard
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from '../../universalLogins/components/BackButton';
 
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
@@ -40,11 +41,10 @@ export default function SearchScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
 
+      <BackButton navigation={navigation} style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
+      
       {/* Header with Search Bar */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-           <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
         <View style={styles.searchBox}>
            <Ionicons name="search" size={20} color="#12783D" />
            <TextInput

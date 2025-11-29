@@ -10,6 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from '../../universalLogins/components/BackButton';
 
 export default function AddressSelectionScreen({ navigation }) {
   const [addresses, setAddresses] = useState([
@@ -63,6 +64,7 @@ export default function AddressSelectionScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <BackButton navigation={navigation} />
       
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>

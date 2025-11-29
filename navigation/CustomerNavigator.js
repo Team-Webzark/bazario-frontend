@@ -1,3 +1,5 @@
+// navigation/CustomerNavigator.js
+
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -27,11 +29,6 @@ import OrderTrackingScreen from '../panels/customer/screens/OrderTrackingScreen'
 import OrderRatingScreen from '../panels/customer/screens/OrderRatingScreen';
 import DeliveryArrivalScreen from '../panels/customer/screens/DeliveryArrivalScreen';
 
-// Full Screens (Onboarding)
-import HouseholdProfileStep1 from '../panels/customer/screens/HouseholdProfileStep1';
-import HouseholdProfileStep2 from '../panels/customer/screens/HouseholdProfileStep2';
-import LocationCaptureScreen from '../panels/customer/screens/LocationCaptureScreen';
-
 // Full Screens (Recipes)
 import RecipeDetailScreen from '../panels/customer/screens/RecipeDetailScreen';
 
@@ -40,7 +37,7 @@ import SavedAddressesScreen from '../panels/customer/screens/SavedAddressesScree
 import PaymentMethodsScreen from '../panels/customer/screens/PaymentMethodsScreen';
 import NotificationsSettingsScreen from '../panels/customer/screens/NotificationsSettingsScreen';
 import IssueReportingScreen from '../panels/customer/screens/IssueReportingScreen';
-import PreferencesEditScreen from '../panels/customer/screens/PreferencesEditScreen'; // New Import
+import PreferencesEditScreen from '../panels/customer/screens/PreferencesEditScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -79,11 +76,6 @@ export default function CustomerNavigator() {
       
       {/* Main Entry: Tabs */}
       <Stack.Screen name="CustomerTabs" component={CustomerTabNavigator} />
-
-      {/* Onboarding / Profile Setup */}
-      <Stack.Screen name="HouseholdProfileStep1" component={HouseholdProfileStep1} />
-      <Stack.Screen name="HouseholdProfileStep2" component={HouseholdProfileStep2} />
-      <Stack.Screen name="LocationCapture" component={LocationCaptureScreen} />
 
       {/* Shopping Flow */}
       <Stack.Screen name="Search" component={SearchScreen} />
