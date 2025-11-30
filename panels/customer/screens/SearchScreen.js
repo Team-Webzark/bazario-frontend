@@ -1,3 +1,5 @@
+// panels/customer/screens/SearchScreen.js
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -5,130 +7,153 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
   StatusBar,
-  Keyboard
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import BackButton from '../../universalLogins/components/BackButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState(['Milk', 'Bread', 'Onion']);
   const inputRef = useRef(null);
 
-  // Auto-focus on mount
+  // Auto-focus: Jaise hi screen aayegi, keyboard khul jayega
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
+    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSearch = (text) => {
     const searchTerm = text || query;
     if (searchTerm.trim()) {
-      // Add to recent (mock logic)
-      if (!recentSearches.includes(searchTerm)) {
-         setRecentSearches([searchTerm, ...recentSearches]);
-      }
       navigation.navigate('SearchResults', { query: searchTerm });
     }
   };
 
-  const clearRecent = () => setRecentSearches([]);
-
-  const trendingTags = ['Atta', 'Rice', 'Chips', 'Chocolate', 'Paneer', 'Maggi'];
-
   return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar backgroundColor="#FFFBF2" barStyle="dark-content" />
 
-      <BackButton navigation={navigation} style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
-      
-      {/* Header with Search Bar */}
+      {/* --- HEADER (Matches HomeHeader Styles) --- */}
       <View style={styles.header}>
+        
+        {/* Back Button */}
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+           <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+
+        {/* Active Search Bar */}
         <View style={styles.searchBox}>
-           <Ionicons name="search" size={20} color="#12783D" />
+           <Ionicons name="search" size={20} color="#12783D" style={{ marginRight: 8 }} />
            <TextInput
              ref={inputRef}
              style={styles.input}
              placeholder="Search for products..."
+             placeholderTextColor="#999"
              value={query}
              onChangeText={setQuery}
              onSubmitEditing={() => handleSearch()}
              returnKeyType="search"
            />
            {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery('')}>
-                 <Ionicons name="close-circle" size={18} color="#ccc" />
-              </TouchableOpacity>
+             <TouchableOpacity onPress={() => setQuery('')}>
+                <Ionicons name="close-circle" size={18} color="#ccc" />
+             </TouchableOpacity>
            )}
         </View>
       </View>
 
+      {/* --- CONTENT BODY --- */}
       <View style={styles.content}>
+         
          {/* Recent Searches */}
          {recentSearches.length > 0 && (
             <View style={styles.section}>
-               <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Recent Searches</Text>
-                  <TouchableOpacity onPress={clearRecent}>
-                     <Text style={styles.clearText}>Clear</Text>
-                  </TouchableOpacity>
+               <Text style={styles.sectionTitle}>Recent</Text>
+               <View style={styles.tagsRow}>
+                  {recentSearches.map((item, index) => (
+                     <TouchableOpacity 
+                        key={index} 
+                        style={styles.historyChip}
+                        onPress={() => handleSearch(item)}
+                     >
+                        <Ionicons name="time-outline" size={14} color="#666" style={{ marginRight: 4 }} />
+                        <Text style={styles.chipText}>{item}</Text>
+                     </TouchableOpacity>
+                  ))}
                </View>
-               {recentSearches.map((item, index) => (
-                  <TouchableOpacity 
-                     key={index} 
-                     style={styles.recentItem}
-                     onPress={() => handleSearch(item)}
-                  >
-                     <Ionicons name="time-outline" size={20} color="#888" />
-                     <Text style={styles.recentText}>{item}</Text>
-                     <Ionicons name="arrow-forward-outline" size={16} color="#ddd" style={{ marginLeft: 'auto' }} />
-                  </TouchableOpacity>
-               ))}
             </View>
          )}
 
-         {/* Trending Tags */}
+         {/* Trending */}
          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Trending Near You</Text>
-            <View style={styles.tagContainer}>
-               {trendingTags.map((tag, index) => (
+            <Text style={styles.sectionTitle}>Trending</Text>
+            <View style={styles.tagsRow}>
+               {['Atta', 'Rice', 'Chips', 'Paneer', 'Maggi'].map((tag, index) => (
                   <TouchableOpacity 
                      key={index} 
-                     style={styles.tag}
+                     style={styles.trendChip}
                      onPress={() => handleSearch(tag)}
                   >
-                     <Text style={styles.tagText}>{tag}</Text>
+                     <Ionicons name="trending-up" size={14} color="#12783D" style={{ marginRight: 4 }} />
+                     <Text style={styles.trendText}>{tag}</Text>
                   </TouchableOpacity>
                ))}
             </View>
          </View>
+
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  container: { flex: 1, backgroundColor: '#FFFBF2' }, // Same background as Home
+  
+  // Header Styling to match Home perfectly
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    paddingVertical: 10, // Matches HomeHeader padding
+  },
+  
   backBtn: { marginRight: 12 },
-  searchBox: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 8, paddingHorizontal: 12, height: 44 },
-  input: { flex: 1, marginLeft: 8, fontSize: 16, color: '#333' },
+
+  searchBox: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#FFF', 
+    borderRadius: 24, 
+    paddingHorizontal: 16, 
+    height: 48, 
+    borderWidth: 1, 
+    borderColor: '#12783D', // Highlighted border color for active state
+    elevation: 2 
+  },
   
-  content: { padding: 16 },
-  
+  input: { flex: 1, fontSize: 15, color: '#333', height: '100%' },
+
+  content: { padding: 20 },
+
   section: { marginBottom: 24 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#666', textTransform: 'uppercase' },
-  clearText: { color: '#12783D', fontSize: 12, fontWeight: 'bold' },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#888', marginBottom: 12, textTransform: 'uppercase' },
+  
+  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  
+  // Chips
+  historyChip: { 
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 8, 
+    borderRadius: 20, borderWidth: 1, borderColor: '#eee' 
+  },
+  chipText: { color: '#333', fontSize: 13 },
 
-  recentItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f9f9f9' },
-  recentText: { marginLeft: 12, fontSize: 16, color: '#333' },
-
-  tagContainer: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
-  tag: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#F0FDF4', borderRadius: 20, borderWidth: 1, borderColor: '#12783D', marginRight: 8, marginBottom: 8 },
-  tagText: { color: '#12783D', fontWeight: 'bold' },
+  trendChip: { 
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#F0FDF4', paddingHorizontal: 12, paddingVertical: 8, 
+    borderRadius: 20, borderWidth: 1, borderColor: '#DCFCE7' 
+  },
+  trendText: { color: '#12783D', fontWeight: '600', fontSize: 13 },
 });
-
-
-

@@ -7,7 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // --- IMPORT YOUR REAL FILES ---
 // Tabs
-import HomeScreen from '../panels/customer/screens/HomeScreen';
+import HomeScreen from '../panels/customer/screens/home/HomeScreen';
 import OrdersTabScreen from '../panels/customer/screens/OrdersTabScreen';
 import RecipeHomeScreen from '../panels/customer/screens/RecipeHomeScreen';
 import AccountScreen from '../panels/customer/screens/AccountScreen';
@@ -78,7 +78,14 @@ export default function CustomerNavigator() {
       <Stack.Screen name="CustomerTabs" component={CustomerTabNavigator} />
 
       {/* Shopping Flow */}
-      <Stack.Screen name="Search" component={SearchScreen} />
+      <Stack.Screen 
+        name="Search" 
+        component={SearchScreen} 
+        options={{ 
+          animation: 'fade', // Fade animation for seamless transition
+          animationDuration: 100 
+        }}
+      />
       <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
       <Stack.Screen name="CategoryListing" component={CategoryListingScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
