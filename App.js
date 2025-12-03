@@ -17,10 +17,10 @@ import LocationCaptureScreen from './panels/customer/screens/LocationCaptureScre
 
 // --- NAVIGATORS ---
 import CustomerNavigator from './navigation/CustomerNavigator';
+import DeliveryNavigator from './navigation/DeliveryNavigator';
 
 // --- PLACEHOLDER DASHBOARDS (Temporary until full navigators are built) ---
 import AdminDashboardScreen from './panels/admin/screens/AdminDashboardScreen';
-import DeliveryDashboardScreen from './panels/delivery/screens/DeliveryDashboardScreen';
 
 const RootStack = createNativeStackNavigator();
 
@@ -45,7 +45,7 @@ export default function App() {
         {/* 4. Main App Flows (Role-based Dashboards) */}
         <RootStack.Screen name="CustomerApp" component={CustomerNavigator} />
         <RootStack.Screen name="AdminApp" component={AdminDashboardScreen} />
-        <RootStack.Screen name="DeliveryApp" component={DeliveryDashboardScreen} />
+        <RootStack.Screen name="DeliveryApp" component={DeliveryNavigator} />
         
       </RootStack.Navigator>
     </NavigationContainer>
